@@ -9,7 +9,7 @@ from sqlmodel import Session, create_engine, select, text
 from dotenv import load_dotenv
 
 # Import unified models
-from model import Paste, PasteCreate
+from models.model import Paste, PasteCreate
 
 load_dotenv()
 
