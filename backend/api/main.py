@@ -29,9 +29,13 @@ app = FastAPI(title="Pastebin-Lite API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[ 
+        "http://localhost:5173",  # Local development
+        "https://pastebin-assessment-git-main-sk-irfan-babas-projects.vercel.app",  # Production frontend
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
+    alloww_credentials=True,
 )
 
 # --- Dependencies & Helpers ---
