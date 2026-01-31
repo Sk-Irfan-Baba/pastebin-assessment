@@ -178,4 +178,11 @@ def view_paste_html(
 
 @app.options("/api/pastes")
 def options_pastes():
-    return Response(status_code=204)
+    return Response(
+        status_code=204,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        },
+    )
