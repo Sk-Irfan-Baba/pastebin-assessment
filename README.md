@@ -1,34 +1,45 @@
-Pastebin-Lite – Full Stack Application
+# Pastebin-Lite – Full Stack Application
 
-A secure, temporary text-sharing application inspired by Pastebin.
-Built to handle high-concurrency scenarios with atomic database updates and deterministic testing capabilities.
+A secure, temporary text-sharing application inspired by Pastebin.  
+Designed to handle high-concurrency scenarios with atomic database updates and deterministic testing capabilities.
 
-Service Status URLs
-Frontend (Deployed): https://your-frontend.vercel.app
-Backend (Deployed): https://your-backend.vercel.app
+---
 
-Tech Stack
-Backend:
-- Python (FastAPI)
+## Service URLs (Production)
+
+- **Frontend (Vercel):** https://your-frontend.vercel.app  
+- **Backend (Vercel):** https://your-backend.vercel.app  
+
+---
+
+## Tech Stack
+
+### Backend
+- Python
+- FastAPI
 - SQLModel (SQLAlchemy)
 - PostgreSQL (Neon)
-- Jinja2 (HTML rendering)
+- Jinja2 (server-side HTML rendering)
+- Uvicorn
 
-Frontend:
+### Frontend
 - React
 - Vite
 - Tailwind CSS
 - Axios
 
-Persistence:
-- PostgreSQL (Neon)
-Chosen for reliable ACID compliance to safely handle race conditions on view counts.
+### Persistence
+- PostgreSQL (Neon)  
+Chosen for ACID compliance and safe handling of race conditions on view counters.
 
-Deployment:
-- Vercel (Serverless Functions)
+### Deployment
+- Vercel (Serverless Functions for backend, Static hosting for frontend)
 
-Project Structure
+---
 
+## Project Structure
+
+```
 pastebin-assessment/
 │
 ├── backend/
@@ -45,170 +56,221 @@ pastebin-assessment/
 │   ├── vercel.json
 │   └── .env.local
 │
-└── README.txt
+└── README.md
+```
 
-Backend Setup (FastAPI)
+---
 
-1. Prerequisites
+## Backend Setup (FastAPI)
+
+### 1. Prerequisites
 - Python 3.9+
 - PostgreSQL database (Local or Cloud / Neon)
+- pip
 
-2. Installation
+### 2. Installation
 
+```bash
 cd backend
 python -m venv venv
+```
 
-Activate virtual environment
+Activate virtual environment:
 
-Windows:
+**Windows (PowerShell)**
+```powershell
 .\venv\Scripts\activate
+```
 
-Mac/Linux:
+**Mac/Linux**
+```bash
 source venv/bin/activate
+```
 
 Install dependencies:
+```bash
 pip install -r requirements.txt
+```
 
-3. Configuration
+---
 
-Create a .env file inside backend/
+### 3. Environment Configuration
 
-backend/.env
+Create a `.env` file inside the `backend/` directory  
+(**Do not commit this file**)
 
+```env
 DATABASE_URL=postgresql://user:password@host/dbname?sslmode=require
 TEST_MODE=0
 BASE_URL=http://127.0.0.1:8000
+```
 
-Variable Notes:
-DATABASE_URL:
-PostgreSQL connection string.
+#### Variable Explanation
 
-TEST_MODE:
-Set to 1 to enable deterministic testing via x-test-now-ms header (required for grader).
+- **DATABASE_URL**  
+  PostgreSQL connection string.
 
-BASE_URL:
-Must always point to the backend URL. This is used to generate /p/{id} links.
+- **TEST_MODE**  
+  Set to `1` to enable deterministic time handling via `x-test-now-ms` header (required for grading).
 
-IMPORTANT IMPORT NOTE (LOCAL vs VERCEL)
+- **BASE_URL**  
+  Must always point to the **backend URL**.  
+  Used to generate `/p/{id}` shareable links.
 
-For Vercel deployment, imports are written as:
+---
+
+### Important Import Note (Local vs Vercel)
+
+For **Vercel deployment**, imports are written as:
+
+```python
 from .models.model import Paste, PasteCreate
+```
 
-For local development, Python module resolution may require changing the import to:
+For **local development**, Python module resolution may require:
+
+```python
 from models.model import Paste, PasteCreate
+```
 
-If you encounter import errors locally, remove the leading dot before models.
-This difference is expected and documented.
+If you encounter import errors locally, remove the leading dot before `models`.  
+The dotted import is intentionally kept for Vercel deployment.
 
-4. Run Backend Server
+---
 
+### 4. Run Backend Server
+
+```bash
 uvicorn api.main:app --reload
+```
 
-Verify:
-Health Check:
-http://127.0.0.1:8000/api/healthz
+#### Verification
 
-API Docs:
-http://127.0.0.1:8000/docs
+- Health check  
+  http://127.0.0.1:8000/api/healthz
 
-Frontend Setup (React + Vite)
+- API documentation  
+  http://127.0.0.1:8000/docs
 
-1. Installation
+- HTML paste view  
+  http://127.0.0.1:8000/p/{paste_id}
 
+---
+
+## Frontend Setup (React + Vite)
+
+### 1. Installation
+
+```bash
 cd frontend
 npm install
+```
 
-2. Configuration
+---
 
-Create a file frontend/.env.local
+### 2. Environment Configuration
 
+Create a `.env.local` file inside `frontend/`  
+(**Do not commit this file**)
+
+```env
 VITE_API_URL=http://127.0.0.1:8000
+```
 
-VITE_API_URL must point to the backend base URL.
+- **VITE_API_URL** must point to the backend base URL.
 
-3. Run Frontend
+---
 
+### 3. Run Frontend
+
+```bash
 npm run dev
+```
 
-UI available at:
+Frontend will be available at:
+
+```
 http://localhost:5173
+```
 
-Critical Design Decisions
+---
 
-1. Hybrid Rendering Strategy
+## Critical Design Decisions
 
-The application supports two viewing modes:
+### 1. Hybrid Rendering Strategy
 
-- GET /p/{id}
-  Server-side rendered HTML via FastAPI + Jinja2.
-  Required for automated grading and curl-based checks.
+- **GET /p/{id}**  
+  Server-side rendered HTML via FastAPI + Jinja2.  
+  Required for automated graders and curl-based validation.
 
-- GET /api/pastes/{id}
-  JSON API consumed by the React frontend for interactive UI rendering.
+- **GET /api/pastes/{id}**  
+  JSON API consumed by the React frontend.
 
-2. Concurrency Safety (Race Conditions)
+---
 
-Problem:
-In serverless environments, naive increments cause lost updates.
+### 2. Concurrency Safety
 
-Solution:
-PostgreSQL row-level locking using SELECT ... FOR UPDATE.
+- PostgreSQL row-level locking using:
+  ```
+  SELECT ... FOR UPDATE
+  ```
+- Ensures accurate view counting under concurrent access.
 
-Result:
-View counts decrement accurately even under simultaneous access.
+---
 
-3. Deterministic Time Testing
+### 3. Deterministic Time Testing
 
-A custom time resolver get_now() is used.
+- When `TEST_MODE=1`, the backend respects the `x-test-now-ms` header.
+- Allows graders to simulate future time for TTL expiry.
 
-When TEST_MODE=1:
-- The backend respects the x-test-now-ms header.
-- Allows the grader to simulate future time for TTL expiry.
+---
 
-4. Persistence Layer Choice
+### 4. Persistence Layer
 
-PostgreSQL was selected because:
-- Vercel serverless functions are stateless.
-- In-memory storage would be unreliable.
-- PostgreSQL provides transactional guarantees and durability.
+- PostgreSQL is required due to the stateless nature of serverless functions.
+- Provides transactional guarantees and durability.
 
-API Endpoints
+---
 
-GET    /api/healthz
-Checks database connectivity.
+## API Endpoints
 
-POST   /api/pastes
-Creates a new paste with optional ttl_seconds and max_views.
+| Method | Endpoint              | Description                                  |
+|------|----------------------|----------------------------------------------|
+| GET  | /api/healthz          | Checks database connectivity                 |
+| POST | /api/pastes           | Creates a new paste                          |
+| GET  | /api/pastes/{id}      | Returns JSON and decrements view count       |
+| GET  | /p/{id}               | Returns HTML and decrements view count       |
 
-GET    /api/pastes/{id}
-Returns JSON content and decrements view count.
+---
 
-GET    /p/{id}
-Returns HTML content and decrements view count.
+## Deployment Notes
 
-Deployment Notes
+### Backend (Vercel)
+- Deployed as a FastAPI serverless function
+- Routing configured via `vercel.json`
+- Environment variables:
+  - `DATABASE_URL`
+  - `TEST_MODE=1`
+  - `BASE_URL=https://your-backend.vercel.app`
 
-Backend (Vercel):
-- Deployed as a FastAPI Serverless Function.
-- Configured via vercel.json to route traffic to api/main.py.
-- Required environment variables:
-  DATABASE_URL
-  TEST_MODE=1
-  BASE_URL=https://your-backend.vercel.app
+### Frontend (Vercel)
+- Deployed as a static Vite build
+- `dist/` directory is not committed
+- Environment variable:
+  - `VITE_API_URL=https://your-backend.vercel.app`
+- SPA routing handled via `vercel.json` rewrites
 
-Frontend (Vercel):
-- Deployed as a static Vite build.
-- dist/ directory is not committed.
-- Required environment variable:
-  VITE_API_URL=https://your-backend.vercel.app
-- SPA routing handled via vercel.json rewrites.
+---
 
-Security Notes
+## Security Notes
 
 The following files must never be committed:
+
+```
 .env
 .env.local
 venv/
 node_modules/
+```
 
-All secrets must be stored in environment variables.
+All secrets must be stored using environment variables.
