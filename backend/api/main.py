@@ -7,6 +7,9 @@ from fastapi import FastAPI, Header, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, create_engine, select, text
 from dotenv import load_dotenv
+from fastapi import Response
+
+
 
 # Import unified models
 from .models.model import Paste, PasteCreate
@@ -171,3 +174,8 @@ def view_paste_html(
     except HTTPException:
         # If get_paste_and_consume raises 404, we return a 404 HTML page
         return HTMLResponse(content="<h1>404 - Paste Not Found or Expired</h1>", status_code=404)
+    
+
+@app.options("/api/pastes")
+def options_pastes():
+    return Response(status_code=204)
