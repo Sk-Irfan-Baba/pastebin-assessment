@@ -35,7 +35,7 @@ app.add_middleware(
     ],
     allow_methods=["*"],
     allow_headers=["*"],
-    alloww_credentials=False,
+    allow_credentials=False,
 )
 
 # --- Dependencies & Helpers ---
