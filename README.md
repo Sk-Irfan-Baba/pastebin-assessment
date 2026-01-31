@@ -7,8 +7,8 @@ Designed to handle high-concurrency scenarios with atomic database updates and d
 
 ## Service URLs (Production)
 
-- **Frontend (Vercel):** https://your-frontend.vercel.app  
-- **Backend (Vercel):** https://your-backend.vercel.app  
+- **Frontend (Vercel):** https://pastebin-assessment-6k95-cm015j7h9-sk-irfan-babas-projects.vercel.app/ 
+- **Backend (Vercel):** https://pastebin-assessment-es5vu9f70-sk-irfan-babas-projects.vercel.app/
 
 ---
 
