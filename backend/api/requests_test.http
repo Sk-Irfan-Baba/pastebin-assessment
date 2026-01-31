@@ -1,0 +1,29 @@
+@baseUrl = http://localhost:8000
+
+# @name createPaste
+POST {{baseUrl}}/api/pastes
+Content-Type: application/json
+
+{
+  "content": "Testing dynamic IDs at {{$datetime iso8601}}",
+  "ttl_seconds": 60,
+  "max_views": 3
+}
+
+### 
+
+# Capture the ID from the response above
+@dynamicId = {{createPaste.response.body.id}}
+
+### Fetch the paste via API
+GET {{baseUrl}}/api/pastes/{{dynamicId}}
+
+### Fetch the paste via HTML (The Browser View)
+GET {{baseUrl}}/p/{{dynamicId}}
+
+### Test Expiry using the deterministic header
+GET {{baseUrl}}/api/pastes/{{dynamicId}}
+x-test-now-ms: 1893456000000
+
+### Health Check (Always good to keep here)
+GET {{baseUrl}}/api/healthz
